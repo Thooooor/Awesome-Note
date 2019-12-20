@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 import sys
 import time
 import os
+import re
 import shutil
 from notepad import Notepad
 from pre import *
@@ -27,6 +28,7 @@ icon_list = {
     'settings': image_path+'settings',
     'new': image_path+'plus',
     'note': image_path+'note',
+    'search': image_path+'search',
 }
 
 
@@ -46,6 +48,7 @@ class Home(QWidget):
     def __init__(self, parent=None):
         super(Home, self).__init__(parent)
         self.notepad = []
+        self.search_window = None
         self.manager = None
         self.update_thread = UpdateData()
 
@@ -82,8 +85,32 @@ class Home(QWidget):
         left_v_layout.addWidget(self.left_list)
         # 搜索栏
         self.left_search = QWidget(self.left_box)
-        self.left_search.setMinimumHeight(400)
+        self.left_search.setMinimumHeight(350)
         self.left_search.setObjectName("搜索")
+        self.left_search_h_layout = QHBoxLayout()
+        self.left_search_v_layout = QVBoxLayout()
+        self.search_box_h_layout = QHBoxLayout()
+
+        self.search_bar = QLineEdit()
+        self.search_bar.setPlaceholderText("输入搜索内容...")
+        self.search_box_h_layout.addWidget(self.search_bar)
+
+        self.search_button = QPushButton()
+        self.search_button.setText("搜索")
+        self.search_button.setIcon(QIcon(icon_list['search']))
+        self.search_button.clicked.connect(self.on_search_click)
+        self.search_box_h_layout.addWidget(self.search_button)
+
+        self.search_box = QWidget()
+        self.search_box.setLayout(self.search_box_h_layout)
+
+        self.search_result = QListWidget()
+
+        self.left_search_v_layout.addWidget(self.search_box)
+        self.left_search_v_layout.addWidget(self.search_result)
+
+        self.left_search.setLayout(self.left_search_v_layout)
+
         left_v_layout.addWidget(self.left_search)
 
         # right 笔记索引栏
@@ -113,7 +140,7 @@ class Home(QWidget):
         create_button.setIcon(QIcon(icon_list['new']))
         bottom_layout.addWidget(create_button, 0, Qt.AlignLeft)
         settings_button = QPushButton('设置')
-        settings_button.clicked.connect(self.close)
+        settings_button.clicked.connect(self.open_search_window)
         settings_button.setIcon(QIcon(icon_list['settings']))
         bottom_layout.addWidget(settings_button, 0, Qt.AlignRight)
         # add to v_layout
@@ -448,6 +475,29 @@ class Home(QWidget):
         elif cancel_button == click_event:
             return 0
 
+    def on_search_click(self):
+        self.search_result.clear()
+        search_key = self.search_bar.text()
+        search_results = []
+        if search_key:
+            self.note_tree.trie_root.get_file_path(search_key, search_results)
+            if len(search_results):
+                for result in search_results:
+                    item_name = re.split('[\\\]', result)[-1]
+                    item_file = NoteFile(item_name, result)
+                    item = QListWidgetItem(self.search_result)
+                    item.setText(item_name)
+                    item.setIcon(QIcon(icon_list[item_file.type]))
+                    item.file = item_file
+        else:
+            print('None')
+
+        self.search_result.itemDoubleClicked.connect(self.on_search_result_double_click)
+
+    def on_search_result_double_click(self):
+        item = self.search_result.currentItem()
+        os.popen(item.file.file_path)
+
     # 打开笔记
     def open_note(self):
         item = self.right_tree.currentItem()
@@ -505,6 +555,10 @@ class Home(QWidget):
         self.notepad.append(None)
         self.notepad[-1] = Notepad()
         self.notepad[-1].show()
+
+    def open_search_window(self):
+        self.search_window = SearchWindow()
+        self.search_window.show()
 
 
 if __name__ == '__main__':

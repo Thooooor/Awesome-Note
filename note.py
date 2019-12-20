@@ -165,14 +165,14 @@ class Tag:
         return self.father
 
     # 生成树
-    def span_tree(self):
+    def span_tree(self, trie_root):
         for filter_name in os.listdir(self.path):
             filter_path = os.path.join(self.path, filter_name)
             if os.path.isdir(filter_path):
                 child_filter = Tag(filter_name, filter_path)
                 self.append_child(child_filter)
                 child_filter.append_father(self)
-                child_filter.span_tree()
+                child_filter.span_tree(trie_root)
             else:
                 file_name = re.split('[.]', filter_name)[0]
                 file_path = filter_path
@@ -181,6 +181,7 @@ class Tag:
                     child_file = NoteFile(file_name, file_path)
                     self.append_file(child_file)
                     self.append_father(self)
+                    trie_root.insert(file_name, file_path)
                 else:
                     filter_path = os.path.join(self.path, file_name)
                     if not os.path.exists(filter_path):
@@ -190,7 +191,7 @@ class Tag:
                     self.append_child(child_filter)
                     child_filter.append_father(self)
                     child_filter.type = "note"
-                    child_filter.span_tree()
+                    child_filter.span_tree(trie_root)
 
     # 重命名子文件
     def rename_files(self):
