@@ -10,6 +10,7 @@ from pre import *
 from map import draw_map
 from note import NoteFile
 from documents import *
+from about_window import About
 
 
 image_path = "image/home/"
@@ -29,6 +30,7 @@ icon_list = {
     'new': image_path+'plus',
     'note': image_path+'note',
     'search': image_path+'search',
+    'about': image_path+'about',
 }
 
 
@@ -139,10 +141,10 @@ class Home(QWidget):
         create_button.clicked.connect(self.open_notepad)
         create_button.setIcon(QIcon(icon_list['new']))
         bottom_layout.addWidget(create_button, 0, Qt.AlignLeft)
-        settings_button = QPushButton('设置')
-        settings_button.clicked.connect(self.open_search_window)
-        settings_button.setIcon(QIcon(icon_list['settings']))
-        bottom_layout.addWidget(settings_button, 0, Qt.AlignRight)
+        about_button = QPushButton('关于')
+        about_button.clicked.connect(self.open_about_window)
+        about_button.setIcon(QIcon(icon_list['about']))
+        bottom_layout.addWidget(about_button, 0, Qt.AlignRight)
         # add to v_layout
         whole_v_layout.addWidget(splitter1)
         whole_v_layout.addWidget(self.bottom_box)
@@ -556,9 +558,9 @@ class Home(QWidget):
         self.notepad[-1] = Notepad()
         self.notepad[-1].show()
 
-    def open_search_window(self):
-        self.search_window = SearchWindow()
-        self.search_window.show()
+    def open_about_window(self):
+        self.about_window = About()
+        self.about_window.show()
 
 
 if __name__ == '__main__':
