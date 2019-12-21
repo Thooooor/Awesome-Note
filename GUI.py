@@ -563,13 +563,17 @@ class Home(QWidget):
         self.about_window.show()
 
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    splash = QSplashScreen(QPixmap("image/cover.jpg"))
-    splash.setWindowOpacity(0.9)
-    splash.show()
+def splash():
+    splash_window = QSplashScreen(QPixmap("image/cover.jpg"))
+    splash_window.setWindowOpacity(0.9)
+    splash_window.show()
     time.sleep(4)
-    splash.close()
+    splash_window.close()
+
+
+def run():
+    app = QApplication(sys.argv)
+    splash()
     home = Home()
     home.show()
     sys.exit(app.exec_())
