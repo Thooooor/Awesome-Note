@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtPrintSupport import *
+from about_window import About
 
 QTextCodec.setCodecForLocale(QTextCodec.codecForName("UTF-8"))
 CONFIG_FILE_PATH = "notepad.ini"
@@ -118,7 +119,7 @@ class Notepad(QMainWindow):
         edit.addAction(self.cut_action)
         edit.addAction(self.copy_action)
         edit.addAction(self.paste_action)
-        edit.addAction(self.clear_action)
+        # edit.addAction(self.clear_action)
         edit.addAction(self.delete_action)
         edit.addSeparator()
         edit.addAction(self.find_action)
@@ -128,11 +129,11 @@ class Notepad(QMainWindow):
         edit.addAction(self.select_all_action)
 
         style = self.menuBar().addMenu("格式")
-        style.addAction(self.auto_wrap_action)
+        # style.addAction(self.auto_wrap_action)
         style.addAction(self.font_action)
 
         view = self.menuBar().addMenu("查看")
-        view.addAction(self.toolbar_action)
+        # view.addAction(self.toolbar_action)
         view.addAction(self.reset_action)
 
         help = self.menuBar().addMenu("帮助")
@@ -148,8 +149,8 @@ class Notepad(QMainWindow):
         self.toolbar.addAction(self.cut_action)
         self.toolbar.addAction(self.copy_action)
         self.toolbar.addAction(self.paste_action)
-        self.toolbar.addSeparator()
-        self.toolbar.addAction(self.clear_action)
+        # self.toolbar.addSeparator()
+        # self.toolbar.addAction(self.clear_action)
 
     # 读取设置
     def reading_settings(self):
@@ -340,6 +341,20 @@ class Notepad(QMainWindow):
         QApplication.restoreOverrideCursor()
 
         self.set_current_file(filename)
+        self.statusBar().showMessage("文件读取成功", 2000)
+
+    def open_out_file(self, file_name, file_path):
+        file = QFile(file_path)
+        if not file.open(QFile.ReadOnly | QFile.Text):
+            QMessageBox.warning(self, "Awesome Note", "文件%s不能被读取:\n%s." % (file_name, file.errorString()))
+            return
+
+        in_file = QTextStream(file)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.text.setPlainText(in_file.readAll())
+        QApplication.restoreOverrideCursor()
+
+        self.set_current_file(file_name)
         self.statusBar().showMessage("文件读取成功", 2000)
 
     # 关闭事件
@@ -591,7 +606,8 @@ class Notepad(QMainWindow):
         self.close()
 
     def about(self):
-        QMessageBox.about(self, "About Awesome Note")
+        self.about_window = About()
+        self.about_window.show()
 
     # 创建动作
     def create_action(self):

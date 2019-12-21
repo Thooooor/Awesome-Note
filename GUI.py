@@ -1,10 +1,9 @@
-from PyQt5.Qt import *
-from PyQt5.QtCore import *
 import sys
 import time
 import os
-import re
 import shutil
+from PyQt5.Qt import *
+from PyQt5.QtCore import *
 from notepad import Notepad
 from pre import *
 from map import draw_map
@@ -31,6 +30,7 @@ icon_list = {
     'note': image_path+'note',
     'search': image_path+'search',
     'about': image_path+'about',
+    'other': image_path+'other',
 }
 
 
@@ -97,11 +97,13 @@ class Home(QWidget):
         self.search_bar.setPlaceholderText("输入搜索内容...")
         self.search_box_h_layout.addWidget(self.search_bar)
 
-        self.search_button = QPushButton()
-        self.search_button.setText("搜索")
-        self.search_button.setIcon(QIcon(icon_list['search']))
-        self.search_button.clicked.connect(self.on_search_click)
-        self.search_box_h_layout.addWidget(self.search_button)
+        search_button = QPushButton()
+        search_button.setObjectName("search_button")
+        search_button.setStyleSheet("#search_button{background-color:white}")
+        search_button.setText("搜索")
+        search_button.setIcon(QIcon(icon_list['search']))
+        search_button.clicked.connect(self.on_search_click)
+        self.search_box_h_layout.addWidget(search_button)
 
         self.search_box = QWidget()
         self.search_box.setLayout(self.search_box_h_layout)
@@ -138,10 +140,14 @@ class Home(QWidget):
         self.bottom_box.setMaximumHeight(50)
         bottom_layout = QHBoxLayout(self.bottom_box)
         create_button = QPushButton('新建')
+        create_button.setObjectName("create_button")
+        create_button.setStyleSheet("#create_button{background-color:white}")
         create_button.clicked.connect(self.open_notepad)
         create_button.setIcon(QIcon(icon_list['new']))
         bottom_layout.addWidget(create_button, 0, Qt.AlignLeft)
         about_button = QPushButton('关于')
+        about_button.setObjectName("about_button")
+        about_button.setStyleSheet("#about_button{background-color:white}")
         about_button.clicked.connect(self.open_about_window)
         about_button.setIcon(QIcon(icon_list['about']))
         bottom_layout.addWidget(about_button, 0, Qt.AlignRight)
@@ -170,7 +176,13 @@ class Home(QWidget):
     # 响应列表双击
     def on_recent_list_double_click(self):
         item = self.left_list.currentItem()
-        os.popen(item.file.file_path)
+        if item.file.type == 'txt' or item.file.type == 'md':
+            self.notepad.append(None)
+            self.notepad[-1] = Notepad()
+            self.notepad[-1].open_out_file(item.file.file_name, item.file.file_path)
+            self.notepad[-1].show()
+        else:
+            os.popen(item.file.file_path)
 
     # 笔记管理
     def build_note_tree(self):
@@ -204,7 +216,7 @@ class Home(QWidget):
             pop_menu.setEnabled(False)
             return pop_menu
 
-        if item.text(1) == 'txt':
+        if item.text(1) == 'txt' or item.text(1) == 'md':
             self.rename_action.setEnabled(False)
             self.open_action.setEnabled(True)
             self.file_to_map_action.setEnabled(True)
@@ -255,12 +267,21 @@ class Home(QWidget):
             self.new_folder_action.setEnabled(True)
             self.new_file_action.setEnabled(True)
         elif item.text(1) == 'System':
+            self.rename_action.setEnabled(False)
             self.open_action.setEnabled(False)
             transform_menu.setEnabled(False)
             self.delete_action.setEnabled(False)
             new_menu.setEnabled(True)
             self.new_folder_action.setEnabled(True)
             self.new_file_action.setEnabled(True)
+        elif item.text(1) == 'other':
+            self.rename_action.setEnabled(False)
+            self.open_action.setEnabled(False)
+            transform_menu.setEnabled(False)
+            self.delete_action.setEnabled(True)
+            new_menu.setEnabled(False)
+            self.new_folder_action.setEnabled(False)
+            self.new_file_action.setEnabled(False)
 
         pop_menu.addAction(self.open_action)
         pop_menu.addAction(self.rename_action)
@@ -282,7 +303,13 @@ class Home(QWidget):
     def on_tree_double_click(self):
         item = self.right_tree.currentItem()
         if item.text(1) and item.text(1) != 'Note' and item.text(1) != 'Folder':
-            os.popen(item.file.file_path)
+            if item.file.type == 'txt' or item.file.type == 'md':
+                self.notepad.append(None)
+                self.notepad[-1] = Notepad()
+                self.notepad[-1].open_out_file(item.file.file_name, item.file.file_path)
+                self.notepad[-1].show()
+            else:
+                os.popen(item.file.file_path)
 
     # 创建动作
     def create_actions(self):
@@ -309,22 +336,26 @@ class Home(QWidget):
         else:
             os.rename(former_path, new_path)
         print(new_path)
-        father.removeChild(item)
-        father.tag = Tag(father.tag.tag, father.tag.path)
-        new_item = QTreeWidgetItem(father)
-        new_item.setText(0, new_name)
-        new_item.setText(1, item.text(1))
-        if item.text(1) == 'Folder':
-            new_item.setIcon(0, QIcon(icon_list['folder']))
-            new_item.tag = Tag(new_name, new_path)
-            new_item.tag.span_tree()
-            self.append_folder(new_item.tag, new_item)
-        elif item.text(1) == 'Note':
-            new_item.setIcon(0, QIcon(icon_list['note']))
-            new_item.tag = Tag(new_name, new_path, tag_type='note')
-            new_item.tag.rename_files()
-            new_item.tag.span_tree()
-            self.append_file(new_item.tag, new_item)
+        try:
+            father.removeChild(item)
+            father.tag = Tag(father.tag.tag, father.tag.path)
+            new_item = QTreeWidgetItem(father)
+            new_item.setText(0, new_name)
+            new_item.setText(1, item.text(1))
+            if item.text(1) == 'Folder':
+                new_item.setIcon(0, QIcon(icon_list['folder']))
+                new_item.tag = Tag(new_name, new_path)
+                new_item.tag.span_tree()
+                self.append_folder(new_item.tag, new_item)
+            elif item.text(1) == 'Note':
+                new_item.setIcon(0, QIcon(icon_list['note']))
+                new_item.tag = Tag(new_name, new_path, tag_type='note')
+                new_item.tag.rename_files()
+                new_item.tag.span_tree()
+                self.append_file(new_item.tag, new_item)
+        except:
+            print('error')
+            self.close()
 
     # 文本转html
     def txt_to_html(self):
@@ -355,7 +386,7 @@ class Home(QWidget):
         word_name = item.file.file_name
 
         html_exist = True
-        if item.file.type == 'txt':
+        if item.file.type == 'txt' or item.file.type == 'md':
             html_path = os.path.join(item.parent().tag.path, word_name+'.html')
             if not os.path.exists(html_path):
                 html_path = txt2html(item.file.file_path)
@@ -477,6 +508,7 @@ class Home(QWidget):
         elif cancel_button == click_event:
             return 0
 
+    # 响应搜索按钮
     def on_search_click(self):
         self.search_result.clear()
         search_key = self.search_bar.text()
@@ -496,14 +528,27 @@ class Home(QWidget):
 
         self.search_result.itemDoubleClicked.connect(self.on_search_result_double_click)
 
+    # 双击打开搜索结果
     def on_search_result_double_click(self):
         item = self.search_result.currentItem()
-        os.popen(item.file.file_path)
+        if item.file.type == 'txt' or item.file.type == 'md':
+            self.notepad.append(None)
+            self.notepad[-1] = Notepad()
+            self.notepad[-1].open_out_file(item.file.file_name, item.file.file_path)
+            self.notepad[-1].show()
+        else:
+            os.popen(item.file.file_path)
 
     # 打开笔记
     def open_note(self):
         item = self.right_tree.currentItem()
-        os.popen(item.file.file_path)
+        if item.file.type == 'txt' or item.file.type == 'md':
+            self.notepad.append(None)
+            self.notepad[-1] = Notepad()
+            self.notepad[-1].open_out_file(item.file.file_name, item.file.file_path)
+            self.notepad[-1].show()
+        else:
+            os.popen(item.file.file_path)
 
     # 笔记转换为思维导图
     def file_to_map(self):

@@ -1,7 +1,7 @@
 import markdown
 import codecs
 import pypandoc
-import pdflatex
+import re
 
 
 def txt2html(txt_path):
@@ -10,7 +10,7 @@ def txt2html(txt_path):
     text = input_file.read()
     html = markdown.markdown(text)
 
-    html_path = txt_path[:-3] + 'html'
+    html_path = re.split('[.]', txt_path)[0] + '.html'
     output_file = codecs.open(html_path, mode='w', encoding="utf-8")
     output_file.write(html)
 
@@ -18,14 +18,15 @@ def txt2html(txt_path):
 
 
 def html2word(html_path):
-    word_path = html_path[:-4] + 'docx'
+    word_path = re.split('[.]', html_path)[0] + '.docx'
+    print(word_path)
     pypandoc.convert_file(html_path, 'docx', outputfile=word_path)
 
     return word_path
 
 
 def word2pdf(word_path):
-    pdf_path = word_path[:-4] + 'pdf'
+    pdf_path = re.split('[.]', word_path)[0] + '.pdf'
     pypandoc.convert_file(word_path, 'pdf', outputfile=pdf_path)
 
     return pdf_path

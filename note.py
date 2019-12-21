@@ -7,6 +7,7 @@ import re
 
 recent_list = []
 list_length = 10
+file_type = ['txt', 'docx', 'html', 'pdf', 'xmind', 'md']
 
 
 # 节点类
@@ -183,15 +184,18 @@ class Tag:
                     self.append_father(self)
                     trie_root.insert(file_name, file_path)
                 else:
-                    filter_path = os.path.join(self.path, file_name)
-                    if not os.path.exists(filter_path):
-                        os.makedirs(filter_path)
-                    shutil.move(file_path, os.path.join(filter_path, filter_name))
-                    child_filter = Tag(file_name, filter_path)
-                    self.append_child(child_filter)
-                    child_filter.append_father(self)
-                    child_filter.type = "note"
-                    child_filter.span_tree(trie_root)
+                    try:
+                        filter_path = os.path.join(self.path, file_name)
+                        if not os.path.exists(filter_path):
+                            os.makedirs(filter_path)
+                        shutil.move(file_path, os.path.join(filter_path, filter_name))
+                        child_filter = Tag(file_name, filter_path)
+                        self.append_child(child_filter)
+                        child_filter.append_father(self)
+                        child_filter.type = "note"
+                        child_filter.span_tree(trie_root)
+                    except:
+                        pass
 
     # 重命名子文件
     def rename_files(self):
@@ -207,11 +211,19 @@ class NoteFile:
     def __init__(self, file_name, file_path):
         self.file_name = re.split('[.]', file_name)[0]
         self.file_path = file_path
-        self.type = re.split('[.]', file_path)[-1]
+        self.type = self.file_type()
         self.father = None
         self.time_data = os.path.getmtime(file_path)
         self.transfer_time()
         self.is_recent_note(self)
+
+    # 判断文件类型
+    def file_type(self):
+        current_type = re.split('[.]', self.file_path)[-1]
+        if current_type in file_type:
+            return current_type
+        else:
+            return 'other'
 
     # 转换时间格式
     def transfer_time(self):
