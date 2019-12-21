@@ -565,6 +565,11 @@ class Home(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    splash = QSplashScreen(QPixmap("image/cover.jpg"))
+    splash.setWindowOpacity(0.9)
+    splash.show()
+    time.sleep(4)
+    splash.close()
     home = Home()
     home.show()
     sys.exit(app.exec_())

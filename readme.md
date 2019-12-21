@@ -3,7 +3,6 @@
 ***run with "python GUI.py"***  
 ## unfinished windows:  
 1.about   
-2.welcome  
 
 ## current functions:  
 1.create and edit notes with Markdown  
