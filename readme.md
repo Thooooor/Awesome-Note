@@ -3,6 +3,7 @@
 ***run with "python GUI.py"***  
 ## unfinished windows:  
 1.about   
+2.动态修改文件之后字典树的更新  
 
 ## current functions:  
 1.create and edit notes with Markdown  
