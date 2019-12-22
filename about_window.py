@@ -1,4 +1,6 @@
 from PyQt5.Qt import *
+from html_window import HtmlWindow
+import os
 
 
 class About(QWidget):
@@ -24,7 +26,7 @@ class About(QWidget):
         self.app_version = QLabel(self.information_bar)
         self.app_version.setText("<p style='font-family:Trebuchet MS;font-size:15px'>"
                                  "<img src='image/about/version.png' align='top' width='25' height='25' />"
-                                 " 软件版本: 1.0.0</p>")
+                                 " 软件版本: 1.0.1</p>")
         self.information_bar_v_layout.addWidget(self.app_version)
 
         self.developer_name = QLabel(self.information_bar)
@@ -67,4 +69,6 @@ class About(QWidget):
         pass
 
     def open_md_book(self):
-        pass
+        md_book_path = "http://wow.kuapp.com/markdown/basic.html"
+        self.md_book = HtmlWindow(md_book_path, title="Markdown语法", icon="image/about/md.png")
+        self.md_book.show()

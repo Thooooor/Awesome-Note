@@ -14,6 +14,8 @@ from about_window import About
 
 image_path = "image/home/"
 icon_list = {
+    'app': "image/app",
+    'cover': 'image/cover.jpg',
     'xmind': image_path+'map',
     'txt': image_path+'txt',
     'pdf': image_path+'pdf',
@@ -62,7 +64,7 @@ class Home(QWidget):
         self.setObjectName("Home")
         self.resize(1080, 720)
         self.center()
-        self.setWindowIcon(QIcon("image/app.png"))
+        self.setWindowIcon(QIcon(icon_list['app']))
         self.setStyleSheet("#Home{background-color:white}")
         self.create_actions()
         self.note_tree = NoteSystem('NoteSystem', root_path="NoteSystem")
@@ -87,7 +89,7 @@ class Home(QWidget):
         left_v_layout.addWidget(self.left_list)
         # 搜索栏
         self.left_search = QWidget(self.left_box)
-        self.left_search.setMinimumHeight(350)
+        self.left_search.setMinimumHeight(200)
         self.left_search.setObjectName("搜索")
         self.left_search_h_layout = QHBoxLayout()
         self.left_search_v_layout = QVBoxLayout()
@@ -345,13 +347,13 @@ class Home(QWidget):
             if item.text(1) == 'Folder':
                 new_item.setIcon(0, QIcon(icon_list['folder']))
                 new_item.tag = Tag(new_name, new_path)
-                new_item.tag.span_tree()
+                new_item.tag.span_tree(self.note_tree.trie_root)
                 self.append_folder(new_item.tag, new_item)
             elif item.text(1) == 'Note':
                 new_item.setIcon(0, QIcon(icon_list['note']))
                 new_item.tag = Tag(new_name, new_path, tag_type='note')
                 new_item.tag.rename_files()
-                new_item.tag.span_tree()
+                new_item.tag.span_tree(self.note_tree.trie_root)
                 self.append_file(new_item.tag, new_item)
         except:
             print('error')
@@ -517,12 +519,13 @@ class Home(QWidget):
             self.note_tree.trie_root.get_file_path(search_key, search_results)
             if len(search_results):
                 for result in search_results:
-                    item_name = re.split('[\\\]', result)[-1]
-                    item_file = NoteFile(item_name, result)
-                    item = QListWidgetItem(self.search_result)
-                    item.setText(item_name)
-                    item.setIcon(QIcon(icon_list[item_file.type]))
-                    item.file = item_file
+                    if os.path.exists(result):
+                        item_name = re.split('[\\\]', result)[-1]
+                        item_file = NoteFile(item_name, result)
+                        item = QListWidgetItem(self.search_result)
+                        item.setText(item_name)
+                        item.setIcon(QIcon(icon_list[item_file.type]))
+                        item.file = item_file
         else:
             print('None')
 
@@ -609,7 +612,7 @@ class Home(QWidget):
 
 
 def splash():
-    splash_window = QSplashScreen(QPixmap("image/cover.jpg"))
+    splash_window = QSplashScreen(QPixmap(icon_list['cover']))
     splash_window.setWindowOpacity(0.9)
     splash_window.show()
     time.sleep(4)
