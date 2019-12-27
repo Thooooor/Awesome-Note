@@ -1,13 +1,14 @@
-# 2019/12/20 Thor  
-**unfinished version**  
-***run with "python GUI.py"***  
-## unfinished windows:  
-1.about   
-2.动态修改文件之后字典树的更新  
+# 2019/12/25 Thor  
+**current version: 1.0.7**  
+***run with "python AwesomeNote.py"***  
+## unfinished parts:  
+1.user_guide_book  
+2.set any folder as your NoteSystem  
 
 ## current functions:  
 1.create and edit notes with Markdown  
-2.transfrom titles in note into mindmap(xmind)  
-3.parser note in markdown into html and docx  
-4.manage your notes tree  
-5.some basic functions  
+2.transform titles and **bodies** in note into mind map(.xmind)  
+3.parser note in markdown(.txt/.md) into html and .docx  
+4.manage your note tree  
+5.use our Notepad as your editor  
+6.some basic functions  
